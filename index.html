@@ -4,94 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jmovies Link Sheet</title>
+    <script src="script.js" defer></script>
+    <script src="firebase.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
     <style>
-        /* Reset default browser styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        /* General page styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             display: flex;
+            flex-direction: column;
             justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding-top: 20px;  /* To avoid the content being too close to the top */
-        }
-
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            width: 80%;
-            max-width: 800px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;  /* Allow vertical scrolling if content exceeds screen height */
-            max-height: 90vh;  /* Limit container height to 90% of the viewport height */
-        }
-
-        h2 {
-            text-align: center;
-            color: #4A90E2;
-            margin-bottom: 20px;
-            font-size: 2rem;
-        }
-
-        /* Styling for the list of videos */
-        .video-list {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        .video-list li {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background-color: #f9f9f9;
-            margin: 10px 0;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #passcode-container, #main-content {
+            display: none;
+            background: #fff;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
         }
 
-        .video-list li:hover {
-            background-color: #e0e0e0;
+        #passcode-container.active, #main-content.active {
+            display: block;
         }
 
-        /* Video title styling */
-        .video-title {
-            font-size: 1.2rem;
-            color: #333;
-            flex: 1;
+        input[type="password"] {
+            padding: 10px;
+            width: 80%;
+            margin-bottom: 10px;
         }
 
-        /* Button styling */
-        .watch-btn {
+        button {
             padding: 10px 20px;
-            font-size: 1rem;
             background-color: #4A90E2;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
         }
 
-        .watch-btn:hover {
+        button:hover {
             background-color: #357ABD;
         }
 
-        .watch-btn:active {
-            background-color: #2C6A96;
+        p.error {
+            color: red;
+            margin-top: 10px;
         }
     </style>
-</head>
-<body>
+    <div id="main-content">
     <div class="container">
         <h2>Jewish Videos</h2>
         <ul class="video-list">
@@ -210,6 +177,7 @@
                 </a>
             </li>
         </ul>
+    </div>
     </div>
 </body>
 </html>
