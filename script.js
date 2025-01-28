@@ -1,3 +1,5 @@
+import { db } from "./firebase.js";
+
 // DOM elements
 const passcodeContainer = document.getElementById("passcode-container");
 const mainContent = document.getElementById("main-content");
@@ -61,6 +63,40 @@ submitPasscodeButton.addEventListener("click", async () => {
     } catch (error) {
         errorMessage.textContent = error.message || "An error occurred.";
         errorMessage.style.display = "block";
+    }
+});
+
+// Check if there's a cookie for the passcode on subsequent visits
+window.addEventListener("load", async () => {
+    const savedPasscode = getCookie("userPasscode");
+
+    if (savedPasscode) {
+        try {
+            // Fetch the stored passcode from Firestore
+            const passcodeDoc = await db.collection("settings").doc("passcode").get();
+
+            if (!passcodeDoc.exists) {
+                throw new Error("Passcode not found in Firebase.");
+            }
+
+            const storedPasscode = passcodeDoc.data().value;
+
+            // If the cookie passcode matches the stored passcode, log the user in
+            if (savedPasscode === storedPasscode) {
+                localStorage.setItem("isAuthenticated", "true");
+                passcodeContainer.classList.remove("active");
+                mainContent.classList.add("active");
+            } else {
+                throw new Error("Stored passcode mismatch. Please re-enter the passcode.");
+            }
+        } catch (error) {
+            console.error(error.message);
+            passcodeContainer.classList.add("active");
+            mainContent.classList.remove("active");
+        }
+    } else {
+        passcodeContainer.classList.add("active");
+        mainContent.classList.remove("active");
     }
 });
 
