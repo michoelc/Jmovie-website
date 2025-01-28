@@ -11,7 +11,6 @@ function setCookie(name, value, days) {
     date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
     const expires = "expires=" + date.toUTCString();
     document.cookie = `${name}=${value};${expires};path=/`;
-    console.log(`Set cookie: ${name}=${value}`);
 }
 
 // Utility function to get a cookie
@@ -20,24 +19,15 @@ function getCookie(name) {
     for (let i = 0; i < cookieArr.length; i++) {
         const cookiePair = cookieArr[i].split("=");
         if (cookiePair[0] === name) {
-            console.log(`Found cookie: ${name}=${cookiePair[1]}`);
             return cookiePair[1];
         }
     }
-    console.log(`Cookie not found: ${name}`);
     return null;
 }
 
-// Set the correct passcode as a cookie (this should only be done once, e.g., by an admin)
-const correctPasscode = "moshiach"; // Change this to your actual passcode
-if (!getCookie("passcode")) {
-    setCookie("passcode", correctPasscode, 7); // Valid for 7 days
-}
-
 // Passcode verification logic
-submitPasscodeButton.addEventListener("click", () => {
+submitPasscodeButton.addEventListener("click", async () => {
     const userInput = passcodeInput.value.trim();
-    const storedPasscode = getCookie("passcode");
 
     if (!userInput) {
         errorMessage.textContent = "Please enter a passcode.";
@@ -45,16 +35,32 @@ submitPasscodeButton.addEventListener("click", () => {
         return;
     }
 
-    if (userInput === storedPasscode) {
-        // Grant access to the main content
-        localStorage.setItem("isAuthenticated", "true"); // Optional: Persist access
-        passcodeContainer.classList.remove("active");
-        mainContent.classList.add("active");
-        console.log("Access granted!");
-    } else {
-        errorMessage.textContent = "Incorrect passcode. Try again.";
+    try {
+        // Fetch the stored passcode from Firestore
+        const passcodeDoc = await db.collection("settings").doc("passcode").get();
+
+        if (!passcodeDoc.exists) {
+            throw new Error("Passcode not found in Firebase.");
+        }
+
+        const storedPasscode = passcodeDoc.data().value;
+
+        // Check if the user input matches the stored passcode
+        if (userInput === storedPasscode) {
+            // Save the user-entered passcode in a cookie
+            setCookie("userPasscode", userInput, 7); // Valid for 7 days
+
+            // Grant access to the main content
+            localStorage.setItem("isAuthenticated", "true");
+            passcodeContainer.classList.remove("active");
+            mainContent.classList.add("active");
+            errorMessage.style.display = "none";
+        } else {
+            throw new Error("Incorrect passcode. Try again.");
+        }
+    } catch (error) {
+        errorMessage.textContent = error.message || "An error occurred.";
         errorMessage.style.display = "block";
-        console.log("Incorrect passcode entered.");
     }
 });
 
@@ -62,5 +68,4 @@ submitPasscodeButton.addEventListener("click", () => {
 if (localStorage.getItem("isAuthenticated") === "true") {
     passcodeContainer.classList.remove("active");
     mainContent.classList.add("active");
-    console.log("Auto-login successful!");
 }
