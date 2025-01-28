@@ -1,4 +1,4 @@
-// Import Firebase services (modular imports)
+// Import Firebase modules
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
 
@@ -14,4 +14,5 @@ const firebaseConfig = {
 
 // Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const db = getFirestore(app); // This initializes Firestore
+export { db }; // Export db so it's accessible in other files

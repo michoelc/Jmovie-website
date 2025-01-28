@@ -1,10 +1,11 @@
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+import { db } from './firebase.js'; // Import db from firebase.js
 
 // Cookie functions
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
+
 
 function setCookie(name, value) {
     const expires = new Date();
