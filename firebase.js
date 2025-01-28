@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -15,4 +15,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
-export const db = getFirestore(app);
+const db = getFirestore(app);
+
+// Export Firestore functions for use in your script.js
+export { db, doc, getDoc };
