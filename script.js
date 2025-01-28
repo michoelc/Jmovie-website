@@ -1,4 +1,16 @@
-import { db } from "./firebase.js";
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js';
+
+// Cookie functions
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+}
+
+function setCookie(name, value) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days expiration
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
 
 // DOM elements
 const passcodeContainer = document.getElementById("passcode-container");
@@ -6,26 +18,6 @@ const mainContent = document.getElementById("main-content");
 const passcodeInput = document.getElementById("passcode-input");
 const submitPasscodeButton = document.getElementById("submit-passcode");
 const errorMessage = document.getElementById("error-message");
-
-// Utility function to set a cookie
-function setCookie(name, value, days) {
-    const date = new Date();
-    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-    const expires = "expires=" + date.toUTCString();
-    document.cookie = `${name}=${value};${expires};path=/`;
-}
-
-// Utility function to get a cookie
-function getCookie(name) {
-    const cookieArr = document.cookie.split("; ");
-    for (let i = 0; i < cookieArr.length; i++) {
-        const cookiePair = cookieArr[i].split("=");
-        if (cookiePair[0] === name) {
-            return cookiePair[1];
-        }
-    }
-    return null;
-}
 
 // Passcode verification logic
 submitPasscodeButton.addEventListener("click", async () => {
@@ -39,24 +31,20 @@ submitPasscodeButton.addEventListener("click", async () => {
 
     try {
         // Fetch the stored passcode from Firestore
-        const passcodeDoc = await db.collection("settings").doc("passcode").get();
+        const passcodeDoc = await getDoc(doc(db, "settings", "passcode"));
 
-        if (!passcodeDoc.exists) {
-            throw new Error("Passcode not found in Firebase.");
+        if (!passcodeDoc.exists()) {
+            throw new Error("Passcode not found.");
         }
 
         const storedPasscode = passcodeDoc.data().value;
 
-        // Check if the user input matches the stored passcode
+        // Check if the input matches the stored passcode
         if (userInput === storedPasscode) {
-            // Save the user-entered passcode in a cookie
-            setCookie("userPasscode", userInput, 7); // Valid for 7 days
-
             // Grant access to the main content
-            localStorage.setItem("isAuthenticated", "true");
+            setCookie("password", storedPasscode); // Save passcode to cookie
             passcodeContainer.classList.remove("active");
             mainContent.classList.add("active");
-            errorMessage.style.display = "none";
         } else {
             throw new Error("Incorrect passcode. Try again.");
         }
@@ -66,42 +54,15 @@ submitPasscodeButton.addEventListener("click", async () => {
     }
 });
 
-// Check if there's a cookie for the passcode on subsequent visits
-window.addEventListener("load", async () => {
-    const savedPasscode = getCookie("userPasscode");
+// Auto-login if passcode is found in cookie
+const savedPassword = getCookie("password");
 
-    if (savedPasscode) {
-        try {
-            // Fetch the stored passcode from Firestore
-            const passcodeDoc = await db.collection("settings").doc("passcode").get();
+if (savedPassword) {
+    // Verify that the saved passcode still matches Firestore
+    const passcodeDoc = await getDoc(doc(db, "settings", "passcode"));
 
-            if (!passcodeDoc.exists) {
-                throw new Error("Passcode not found in Firebase.");
-            }
-
-            const storedPasscode = passcodeDoc.data().value;
-
-            // If the cookie passcode matches the stored passcode, log the user in
-            if (savedPasscode === storedPasscode) {
-                localStorage.setItem("isAuthenticated", "true");
-                passcodeContainer.classList.remove("active");
-                mainContent.classList.add("active");
-            } else {
-                throw new Error("Stored passcode mismatch. Please re-enter the passcode.");
-            }
-        } catch (error) {
-            console.error(error.message);
-            passcodeContainer.classList.add("active");
-            mainContent.classList.remove("active");
-        }
-    } else {
-        passcodeContainer.classList.add("active");
-        mainContent.classList.remove("active");
+    if (passcodeDoc.exists() && passcodeDoc.data().value === savedPassword) {
+        passcodeContainer.classList.remove("active");
+        mainContent.classList.add("active");
     }
-});
-
-// Auto-login if already authenticated
-if (localStorage.getItem("isAuthenticated") === "true") {
-    passcodeContainer.classList.remove("active");
-    mainContent.classList.add("active");
 }
