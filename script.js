@@ -1,11 +1,10 @@
-import { db } from './firebase.js'; // Import db from firebase.js
+import { db, getDoc, doc } from './firebase.js'; // Import necessary functions
 
 // Cookie functions
 function getCookie(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
-
 
 function setCookie(name, value) {
     const expires = new Date();
