@@ -1,15 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jmovies Link Sheet</title>
-    <script src="script.js" defer></script>
-    <script src="firebase.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js"></script>
-    <style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jmovies Link Sheet</title>
+  <script type="module" src="script.js" defer></script>
+  <script type="module" src="firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js"></script>
+  <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -58,7 +57,14 @@
             margin-top: 10px;
         }
     </style>
-    <div id="main-content">
+    </head>
+    <body>
+        <div id="passcode-container" class="active">
+            <input type="password" id="passcode-input" placeholder="Enter passcode" />
+            <button id="submit-passcode">Submit</button>
+            <p id="error-message" class="error" style="display: none;"></p>
+          </div>
+          <div id="main-content">
     <div class="container">
         <h2>Jewish Videos</h2>
         <ul class="video-list">
