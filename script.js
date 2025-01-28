@@ -11,6 +11,7 @@ function setCookie(name, value, days) {
     date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
     const expires = "expires=" + date.toUTCString();
     document.cookie = `${name}=${value};${expires};path=/`;
+    console.log(`Set cookie: ${name}=${value}`);
 }
 
 // Utility function to get a cookie
@@ -19,14 +20,16 @@ function getCookie(name) {
     for (let i = 0; i < cookieArr.length; i++) {
         const cookiePair = cookieArr[i].split("=");
         if (cookiePair[0] === name) {
+            console.log(`Found cookie: ${name}=${cookiePair[1]}`);
             return cookiePair[1];
         }
     }
+    console.log(`Cookie not found: ${name}`);
     return null;
 }
 
 // Set the correct passcode as a cookie (this should only be done once, e.g., by an admin)
-const correctPasscode = "my_secure_passcode"; // Change this to your actual passcode
+const correctPasscode = "moshiach"; // Change this to your actual passcode
 if (!getCookie("passcode")) {
     setCookie("passcode", correctPasscode, 7); // Valid for 7 days
 }
@@ -47,9 +50,11 @@ submitPasscodeButton.addEventListener("click", () => {
         localStorage.setItem("isAuthenticated", "true"); // Optional: Persist access
         passcodeContainer.classList.remove("active");
         mainContent.classList.add("active");
+        console.log("Access granted!");
     } else {
         errorMessage.textContent = "Incorrect passcode. Try again.";
         errorMessage.style.display = "block";
+        console.log("Incorrect passcode entered.");
     }
 });
 
@@ -57,4 +62,5 @@ submitPasscodeButton.addEventListener("click", () => {
 if (localStorage.getItem("isAuthenticated") === "true") {
     passcodeContainer.classList.remove("active");
     mainContent.classList.add("active");
+    console.log("Auto-login successful!");
 }
