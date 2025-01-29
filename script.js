@@ -1,3 +1,17 @@
+import { db, getDoc, doc } from './firebase.js'; // Import necessary functions
+
+// Cookie functions
+function getCookie(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+}
+
+function setCookie(name, value) {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 days expiration
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/`;
+}
+
 // DOM elements
 const passcodeContainer = document.getElementById("passcode-container");
 const mainContent = document.getElementById("main-content");
@@ -17,9 +31,9 @@ submitPasscodeButton.addEventListener("click", async () => {
 
     try {
         // Fetch the stored passcode from Firestore
-        const passcodeDoc = await db.collection("settings").doc("passcode").get();
+        const passcodeDoc = await getDoc(doc(db, "settings", "passcode"));
 
-        if (!passcodeDoc.exists) {
+        if (!passcodeDoc.exists()) {
             throw new Error("Passcode not found.");
         }
 
@@ -28,7 +42,7 @@ submitPasscodeButton.addEventListener("click", async () => {
         // Check if the input matches the stored passcode
         if (userInput === storedPasscode) {
             // Grant access to the main content
-            localStorage.setItem("isAuthenticated", "true"); // Optional: Persist access
+            setCookie("password", storedPasscode); // Save passcode to cookie
             passcodeContainer.classList.remove("active");
             mainContent.classList.add("active");
         } else {
@@ -40,8 +54,15 @@ submitPasscodeButton.addEventListener("click", async () => {
     }
 });
 
-// Auto-login if already authenticated
-if (localStorage.getItem("isAuthenticated") === "true") {
-    passcodeContainer.classList.remove("active");
-    mainContent.classList.add("active");
+// Auto-login if passcode is found in cookie
+const savedPassword = getCookie("password");
+
+if (savedPassword) {
+    // Verify that the saved passcode still matches Firestore
+    const passcodeDoc = await getDoc(doc(db, "settings", "passcode"));
+
+    if (passcodeDoc.exists() && passcodeDoc.data().value === savedPassword) {
+        passcodeContainer.classList.remove("active");
+        mainContent.classList.add("active");
+    }
 }
